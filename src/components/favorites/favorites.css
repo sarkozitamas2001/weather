@@ -1,0 +1,9 @@
+.favorite-deletion {
+  font-size: 17px;
+  color: rgb(255, 0, 0);
+  cursor: pointer;
+}
+
+.city-name-favorite {
+  margin-left: 1%;
+}

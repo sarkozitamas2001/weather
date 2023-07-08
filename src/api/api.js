@@ -3,7 +3,7 @@ import axios from "axios";
 const apiUrl = process.env.REACT_APP_API_URL;
 const apiKey = process.env.REACT_APP_API_KEY;
 
-export const fetchForecast = async (city = "Cluj-Napoca") => {
+export const fetchForecast = async (city = "Cehu Silvaniei") => {
   try {
     const response = await axios.get(`${apiUrl}/forecast.json`, {
       params: {

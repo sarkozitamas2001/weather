@@ -6,102 +6,41 @@ import {
   AccordionItemHeading,
   AccordionItemPanel,
 } from "react-accessible-accordion";
-import "./forecast.css";
-import { fetchForecast } from "../../api/api.js";
-import {
-  setFavoriteStatus,
-  getFavoriteStatus,
-  deleteFavorite,
-} from "../../utils/localStorageHelpers.js";
-import { herculeanPropotionsMititeiSuccessChance } from "../../utils/successfulBBQ.js";
-const Forecast = () => {
-  const [forecast, setForecast] = useState([]);
+import "./favorites.css";
+
+import { getFavorites, deleteFavorite } from "../../utils/localStorageHelpers";
+import { herculeanPropotionsMititeiSuccessChance } from "../../utils/successfulBBQ";
+
+const Favorites = () => {
+  const [favorites, setFavorites] = useState({});
 
   useEffect(() => {
-    const fetchForecastAsync = async () => {
-      try {
-        const response = await fetchForecast();
-        const { country, name } = response.location;
-
-        const forecastWithFavorites = response.forecast.forecastday.map(
-          (item) => ({
-            ...item,
-            favorite: getFavoriteStatus(item.date),
-          })
-        );
-
-        setForecast({
-          country,
-          name,
-          forecastday: forecastWithFavorites,
-        });
-      } catch (error) {
-        console.log(error.message);
-      }
-    };
-
-    fetchForecastAsync();
+    setFavorites(getFavorites());
   }, []);
 
-  const handleToggleFavorite = (event, element) => {
+  const handleFavoriteDeletion = (event, date) => {
     event.stopPropagation();
-
-    setForecast((prevForecast) => {
-      const updatedForecast = prevForecast.forecastday.map((item) => {
-        if (item.date === element.date) {
-          const favorite = !item.favorite;
-          if (favorite) {
-            const day = {
-              condition: {
-                icon: element.day.condition.icon,
-                text: element.day.condition.text,
-              },
-              mintemp_c: element.day.mintemp_c,
-              maxtemp_c: element.day.maxtemp_c,
-              daily_chance_of_rain: element.day.daily_chance_of_rain,
-              totalprecip_mm: element.day.totalprecip_mm,
-              daily_chance_of_snow: element.day.daily_chance_of_snow,
-              totalsnow_cm: element.day.totalsnow_cm,
-              avghumidity: element.day.avghumidity,
-              uv: element.day.uv,
-            };
-            setFavoriteStatus(element.date, day, forecast.name);
-          } else {
-            console.log("click");
-            deleteFavorite(element.date);
-          }
-          return {
-            ...item,
-            favorite,
-          };
-        }
-        return item;
-      });
-      return {
-        ...prevForecast,
-        forecastday: updatedForecast,
-      };
-    });
+    const newFavorites = deleteFavorite(date);
+    setFavorites(newFavorites);
   };
 
-  if (!forecast || !forecast.forecastday || forecast.forecastday.length === 0) {
+  if (!favorites || Object.keys(favorites).length === 0) {
     return null;
   }
 
   return (
     <>
-      <label className="city-name">{forecast.name}</label>
       <Accordion allowZeroExpanded allowMultipleExpanded>
-        {forecast.forecastday.map((element) => (
-          <AccordionItem key={element.date}>
+        {Object.entries(favorites).map(([date, element]) => (
+          <AccordionItem key={date}>
             <AccordionItemHeading>
               <AccordionItemButton>
                 <div className="daily-item">
                   <span
-                    className={`star ${element.favorite ? "filled" : ""}`}
-                    onClick={(event) => handleToggleFavorite(event, element)}
+                    className="favorite-deletion"
+                    onClick={(event) => handleFavoriteDeletion(event, date)}
                   >
-                    &#9734;
+                    &#10005;
                   </span>
 
                   <img
@@ -109,7 +48,7 @@ const Forecast = () => {
                     className="icon-weather"
                     alt="weather"
                   />
-                  <label className="date">{element.date}</label>
+                  <label className="date">{date}</label>
                   <label className="mititei-success">
                     Herculean-Proportions-Mititei-Success:{" "}
                     {herculeanPropotionsMititeiSuccessChance(
@@ -125,6 +64,7 @@ const Forecast = () => {
                     {" "}
                     {element.day.mintemp_c}°C / {element.day.maxtemp_c}°C{" "}
                   </label>
+                  <label className="city-name-favorite">{element.name}</label>
                 </div>
               </AccordionItemButton>
             </AccordionItemHeading>
@@ -163,4 +103,4 @@ const Forecast = () => {
   );
 };
 
-export default Forecast;
+export default Favorites;
