@@ -7,3 +7,12 @@
 .city-name-favorite {
   margin-left: 1%;
 }
+
+.favorite-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5%;
+  font-size: 23px;
+  font-weight: 700;
+}

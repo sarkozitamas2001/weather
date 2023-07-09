@@ -17,7 +17,7 @@ export const fetchForecast = async (city = "Cehu Silvaniei") => {
     });
     return response.data;
   } catch (error) {
-    console.log(error);
-    throw error;
+    console.log(error.response.data.error);
+    throw error.response.data.error;
   }
 };

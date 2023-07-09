@@ -1,0 +1,2 @@
+I've never used the `localStorage` property before and I find it useful when there is small data that you want to store
+that is not worth it to be stored in the db, not user-specific and not considered critical.

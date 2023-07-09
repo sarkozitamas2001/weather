@@ -6,7 +6,10 @@ import {
   AccordionItemHeading,
   AccordionItemPanel,
 } from "react-accessible-accordion";
+import Search from "../search/search";
+
 import "./forecast.css";
+
 import { fetchForecast } from "../../api/api.js";
 import {
   setFavoriteStatus,
@@ -14,19 +17,22 @@ import {
   deleteFavorite,
 } from "../../utils/localStorageHelpers.js";
 import { herculeanPropotionsMititeiSuccessChance } from "../../utils/successfulBBQ.js";
+
 const Forecast = () => {
   const [forecast, setForecast] = useState([]);
+  const [cityName, setCityName] = useState("Cehu Silvaniei");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchForecastAsync = async () => {
       try {
-        const response = await fetchForecast();
+        const response = await fetchForecast(cityName);
         const { country, name } = response.location;
 
         const forecastWithFavorites = response.forecast.forecastday.map(
           (item) => ({
             ...item,
-            favorite: getFavoriteStatus(item.date),
+            favorite: getFavoriteStatus(item.date, name),
           })
         );
 
@@ -35,13 +41,14 @@ const Forecast = () => {
           name,
           forecastday: forecastWithFavorites,
         });
+        setError(null);
       } catch (error) {
-        console.log(error.message);
+        setError(error);
       }
     };
 
     fetchForecastAsync();
-  }, []);
+  }, [cityName]);
 
   const handleToggleFavorite = (event, element) => {
     event.stopPropagation();
@@ -67,8 +74,7 @@ const Forecast = () => {
             };
             setFavoriteStatus(element.date, day, forecast.name);
           } else {
-            console.log("click");
-            deleteFavorite(element.date);
+            deleteFavorite(element.date, forecast.name);
           }
           return {
             ...item,
@@ -84,12 +90,30 @@ const Forecast = () => {
     });
   };
 
+  const handleOnSearchChange = (searchData) => {
+    setCityName(searchData);
+  };
+
+  if (error) {
+    let message = "Something is wrong on the server side.";
+    if (error.code === 1003 || error.code === 1006) {
+      message = "The given location doesn't exist.";
+    }
+    return (
+      <>
+        <Search onSearchChange={handleOnSearchChange} />
+        <label className="error-message">{message}</label>
+      </>
+    );
+  }
+
   if (!forecast || !forecast.forecastday || forecast.forecastday.length === 0) {
     return null;
   }
 
   return (
     <>
+      <Search onSearchChange={handleOnSearchChange} />
       <label className="city-name">{forecast.name}</label>
       <Accordion allowZeroExpanded allowMultipleExpanded>
         {forecast.forecastday.map((element) => (

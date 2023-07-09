@@ -1,12 +1,19 @@
 export const setFavoriteStatus = (date, day, cityName) => {
   const favorites = JSON.parse(localStorage.getItem("favorites")) || {};
-  favorites[date] = { day, name: cityName };
+
+  if (typeof favorites[date] === "undefined") {
+    favorites[date] = {};
+  }
+  favorites[date][cityName] = { day, name: cityName };
   localStorage.setItem("favorites", JSON.stringify(favorites));
 };
 
-export const getFavoriteStatus = (date) => {
+export const getFavoriteStatus = (date, cityName) => {
   const favorites = JSON.parse(localStorage.getItem("favorites")) || {};
-  return typeof favorites[date] !== "undefined" ? true : false;
+  if (typeof favorites[date] === "undefined") {
+    return false;
+  }
+  return typeof favorites[date][cityName] !== "undefined" ? true : false;
 };
 
 export const getFavorites = () => {
@@ -14,10 +21,13 @@ export const getFavorites = () => {
   return favorites;
 };
 
-export const deleteFavorite = (date) => {
+export const deleteFavorite = (date, cityName) => {
   const favorites = JSON.parse(localStorage.getItem("favorites")) || {};
   if (typeof favorites[date] !== "undefined") {
-    delete favorites[date];
+    delete favorites[date][cityName];
+    if (Object.keys(favorites[date]).length === 0) {
+      delete favorites[date];
+    }
   }
   localStorage.setItem("favorites", JSON.stringify(favorites));
   return favorites;
